@@ -19,6 +19,20 @@ export default function Page() {
 
   // registering users
   const handleSignUp = () => {
+
+    // validating inputs
+    if (!email || !password) {
+      Toast.show({
+        type: 'error',
+        text1: 'Please provide the required fields.',
+        visibilityTime: 4000,
+        autoHide: true,
+      });
+      dismissKeyboard();
+      return;
+    }
+
+    // create user
     auth
       .createUserWithEmailAndPassword(email, password)
       .then(() => {
@@ -31,12 +45,29 @@ export default function Page() {
         })
       })
       .catch((error) => {
-        Toast.show({
-          type: 'error',
-          text1: 'This mail is already registered.',
-          visibilityTime: 4000,
-          autoHide: true,
-        })
+        if(error.code === 'auth/email-already-in-use'){
+          Toast.show({
+            type: 'error',
+            text1: 'This mail is already registered. Try again',
+            visibilityTime: 4000,
+            autoHide: true,
+          })
+        } else if(error.code === 'auth/invalid-email'){
+          Toast.show({
+            type: 'error',
+            text1: 'Invalid email.',
+            visibilityTime: 4000,
+            autoHide: true,
+          })
+        }else if(error.code === 'auth/weak-password'){
+          Toast.show({
+            type: 'error',
+            text1: 'Password must be at least 6 characters',
+            visibilityTime: 4000,
+            autoHide: true,
+          })
+        }
+      
       })
   }
 
@@ -48,7 +79,7 @@ export default function Page() {
   return (
     <TouchableWithoutFeedback onPress={dismissKeyboard}>
       <KeyboardAvoidingView style={styles.container} behavior="padding">
-        <Toast style={{ marginTop: 50 }} ref={(ref) => Toast.forwardRef(ref)} />
+        <Toast topOffset={80} ref={(ref) => Toast.forwardRef(ref)} />
         <Text style={styles.welcomeText}>Register account</Text>
         <View style={styles.inputContainer}>
           <TextInput
